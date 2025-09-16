@@ -57,10 +57,10 @@ if you have installed K.A.R.I, you can also do it directly:
 ```
 kari-cli module new [Name] --type [internal|prosthetic] --action [action_1] [action_2]
 ```
-
 example:
 ```
-kari-cli module new Testing --type prosthetic --action scan_test```
+kari-cli module new Testing --type prosthetic --action scan_test
+```
 
 
 This creates a ready-to-go **blueprint folder** with:
