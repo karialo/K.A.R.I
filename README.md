@@ -32,3 +32,6 @@ kari-cli status
 
 # view logs
 kari-cli logs
+
+# HELP ME!
+kari-cli -h
