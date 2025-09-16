@@ -212,7 +212,5 @@ Don’t worry — K.A.R.I’s got you (probably).
 Remember: if all else fails, try turning it off and on again.
 (Or offer me snacks.)
 
-```
-
 ---
 
