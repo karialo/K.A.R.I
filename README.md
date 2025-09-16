@@ -53,6 +53,16 @@ example:
 python3 utils/mod_gen.py port_scanner prosthetic scan_network report_alive_hosts attempt_connection
 ```
 
+if you have installed K.A.R.I, you can also do it directly:
+```
+kari-cli module new [Name] --type [internal|prosthetic] --action [action_1] [action_2]
+```
+
+example:
+```
+kari-cli module new Testing --type prosthetic --action scan_test```
+
+
 This creates a ready-to-go **blueprint folder** with:
 
 * `module.py` — skeleton code with metadata and hooks.
