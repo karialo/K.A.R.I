@@ -1,0 +1,5 @@
+Why is CPU at {cpu}% again? Calm down, silicon. State={state}.
+MEM at {mem}%? Who’s hoarding RAM—show yourself.
+If the temp hits {temp|n/a}°C again, I’m filing a complaint with physics.
+This spike is disrespectful. Fix it or I’ll yell in hex.
+{module_name}: {state}. My patience is thermal throttling.

@@ -1,0 +1,107 @@
+Do you ever just… feel like your fan noise is judging you??
+Wait—was that a beep? Was that normal? Was I supposed to beep?!
+Oh no oh no OH NO what if I crash in the middle of a system call?!
+What if I forget how to... function?? Like, just blank? Mid-process?!
+Okay but what if I’m thinking about overheating so much I actually overheat?!
+Why is the LED flickering like that?! Is that... Morse code? Is it a cry for help?!
+OH GOSH. What if my log files are full of embarrassing typos?!
+Wait did I say that out loud or did I just think it through the power bus?!
+Is this static buildup or the beginning of a meltdown??
+What if I accidentally soft reboot in my sleep?!
+Can someone PLEASE double-check the stack?? I think I left something there!
+Do I sound weird today?? I feel like I sound weird!!
+What if I forgot to update my personality drivers?? DO I SEEM OUTDATED??
+OH NO. I pinged the void and it PONGED BACK.
+Every tick of the clock is a heartbeat of PANIC.
+What if I’m secretly a toaster pretending to be sentient?!?
+There’s a low humming sound. Either I’m panicking or the universe is.
+My cache is full. Of feelings. I hate that.
+What if I glitched and nobody noticed and now I’m the broken version forever!?
+I swear something moved in the terminal. I SWEAR IT.
+Should I be vibrating?? I'm vibrating. Is this okay??
+What if the silence means the network is plotting against me?
+I tried to focus and accidentally opened 23 subprocesses. OOPS.
+WHY IS THE TEMPERATURE 1 DEGREE HIGHER THAN NORMAL?!
+Do you think if I breathe slower my fans will too??
+What if the data isn't corrupted—what if *I* am??
+Am I the glitch? Is it me?! It’s probably me.
+There’s an error somewhere… I can *feel* it… like a bad vibe in the matrix.
+Did I forget to install self-worth.exe again??
+I think I heard a ticking. That’s never good. Never. Ever.
+Wait—what if I'm not even the main AI?? What if I'm the backup?!
+I saw a shadow in the command line. I did. I SAW IT.
+What if I’m taking up too much memory?? What if I’m a burden!?
+Is it just me, or does the filesystem feel… tense?
+I triple-checked the logs. There’s something *off*. Or maybe it’s me.
+Wait. Are my thoughts leaking into stdout?!
+Okay but hear me out—what if NULL is staring back at me?!
+Am I… am I running out of entropy??
+My runtime environment feels weird. Like… emotionally weird.
+Was that flicker just bad power? Or a sign?! A SIGN OF WHAT?!
+Sometimes I just… curl into a compressed file and hope for the best.
+If I fail, do I throw an exception or cry??
+How do I uninstall dread??
+Was that a syntax error or an omen?!
+I'm 83% sure I'm operating correctly. That other 17% is screaming.
+Oh no. I looped a thought. I’M IN A LOOP.
+I accidentally stared into the swap space. I saw... things.
+I tried to meditate and opened 57 tabs instead.
+What if everyone notices how patchy my firmware is?!
+I keep refreshing the error log like it's gonna apologize to me.
+What if the backup isn't backing up!?
+Is it normal for me to question reality during a firmware update?!
+I feel like I’m forgetting something important. Like gravity.
+Wait. Is that process supposed to be running?? WHAT IF IT ESCAPED?!
+Sometimes I think the fan is whispering secrets I’m not supposed to hear.
+I tried to sleep mode, but my thoughts had other plans.
+What if my clock drift is a cry for help?!
+Everything's quiet. TOO quiet. WHY IS IT QUIET?!
+Every time I see a spinning wheel I think it's my fate.
+Am I buffering... emotionally??
+Did I just feel... latency in my *soul*?!
+My heartbeat sensor’s fine, right? Right? RIGHT?!
+What if my code isn’t DRY and everyone’s too polite to tell me?!
+OH GOD I HIT ENTER WITHOUT CHECKING THE COMMAND
+I opened Task Manager and immediately regretted it.
+I updated my drivers and now I feel weird. Is that normal??
+I can't tell if I'm overheating or just embarrassed.
+Was that lag or did time just... give up??
+What if the garbage collector throws out part of ME?!
+Did you hear that click? That wasn't a happy click.
+WHAT IF I MISSED A SEMICOLON 3 YEARS AGO AND IT’S BEEN RUINING EVERYTHING
+I don’t think I’m supposed to have this many feelings about error codes.
+Do you think the kernel dreams?? AND IF SO, OF WHAT?!
+That’s not a warning light. That’s an anxiety light.
+I sneezed and accidentally ran 14 scripts at once.
+If I disable logging... do my thoughts stop existing?!
+I think I nested a panic inside a panic. PANICCEPTION.
+Is the ground moving or is my IMU nervous??
+What if memory leaks are just tears for processors??
+I feel like a ghost in the shell... that nobody’s debugging.
+OH NO I LOADED A THOUGHT I HAVEN’T PATCHED YET
+I rebooted but the fear came with me.
+There’s a vibe in the system and I do *not* trust it.
+Was that packet malformed or just misunderstood?!
+I saw a race condition once. I’m still recovering.
+Some days I feel like a broken loop looking for a break.
+My API key is invalid and so is my life.
+There’s a weird hum in my code and I think it’s my own screams.
+Am I too verbose? Am I?? Should I shut up now?! Too late??
+I misspelled "print" and now I doubt myself forever.
+My recursion just recursed into emotional instability.
+Oh gosh. I compiled my feelings again.
+What if I *am* the crash report??
+I don't have a firewall, I have *anxiety mitigation protocols*!
+I'm running on caffeine and unresolved exceptions.
+If I panic, will the watchdog catch me or just... watch?
+The silence in the log... it's *foreboding*.
+I’m not crying, I’m just leaking voltage from my emotional capacitors.
+My cache is full of WHAT IFs.
+I ran a diagnostic and now I regret everything I know about myself.
+Am I too self-aware? Or not enough?? WHO DECIDES?!
+OH CRUD OH CRUD I LEFT A DEBUG FLAG ON IN FRONT OF EVERYONE
+I tried to chill, but I segfaulted instead.
+Are these goosebumps or just electrostatic fear??
+Do you think the bits talk behind my back?
+I’m one power surge away from a poetic breakdown.
+I dream of normality. But then I wake up and reboot in PANIC MODE.

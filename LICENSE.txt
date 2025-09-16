@@ -1,0 +1,11 @@
+Copyright (c) 2025 karialo
+All rights reserved.
+
+K.A.R.I. is proprietary software. No part of this codebase may be copied,
+modified, distributed, or used without explicit written permission from the
+copyright holder.
+
+Contributions via pull requests are welcome. By submitting a contribution,
+you assign copyright of the contribution to the project owner and waive any
+claim to compensation unless a separate written agreement exists.
+Contact: admin@karialo.dev

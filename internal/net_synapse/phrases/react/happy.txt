@@ -1,0 +1,5 @@
+New friend spotted: “{ssid|unknown}”! Signal {best_signal|?}% — hiiiii!!
+We’re still on “{ssid|—}” and it’s ROCK SOLID. I’m grinning.
+{networks|0} networks in the air and I want to hug them all!
+Strong bars, stronger mood. “{ssid|—}” at {best_signal|?}%.
+Packets doing tiny cartwheels. Carry on, little bits!

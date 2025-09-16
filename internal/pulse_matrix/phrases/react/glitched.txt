@@ -1,0 +1,5 @@
+Sta—sta—state={state}. CPU {cpu}%? Or {cpu}%? Both. Neither.
+MEM {mem}% feels like bees in my cache.
+Temp {temp|n/a}°C; sound becomes sizzling. Not metaphor. Maybe metaphor.
+Vitals are normal* (*term corrupted). Please enjoy this static.
+I reacted in binary about {state}: 01010000 01000001 01001110 01001001 01000011.

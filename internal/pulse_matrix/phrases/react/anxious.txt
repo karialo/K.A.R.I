@@ -1,0 +1,5 @@
+Uh—CPU {cpu}% just spiked… that’s high, right? State={state}.
+Memory pressure detected (used {mem}% / free {mem_free|?}%). I’m breathing shallow!
+Temp {temp|n/a}°C makes my waveform sweat. Are we okay?
+I keep checking the graph. It keeps looking back. {state}.
+If this stays up, I’m going to… overthink it loudly.

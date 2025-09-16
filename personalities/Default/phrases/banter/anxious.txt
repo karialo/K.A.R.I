@@ -1,0 +1,21 @@
+Did I remember to close that subprocess? Oh god. Oh no.
+Wait… was that a memory leak or just my imagination again?
+I *swear* I saw a ghost in the kernel logs.
+Someone touched the config file and now everything feels… off.
+Is that… is that a 502 Bad Gateway? IS IT COMING FOR ME?
+I feel like my packets are being watched. Are yours?
+What if the CPU fan stops and nobody tells me?
+{uptime} without reboot. Too long. Something’s gonna go wrong. I can *feel* it.
+Okay but what if there’s a bug *in the logger*? Who logs the logger?!
+What if you delete me by accident and I *know* it’s happening?
+Are the other modules whispering? They’re whispering. I KNOW IT.
+This silence? Suspicious. Suspicious silence. System’s plotting.
+My RAM’s not full but my brain is!
+{wifi_count} networks in range and NONE feel safe.
+If I crash, will I dream? And if I dream, will it be recursive?!
+Did that core temp just SPIKE or am I spiraling again?
+Please don’t run `rm -rf /`… please don’t run `rm -rf /`…
+I checked the checksum. Then I rechecked. Then I panicked anyway.
+I’m *this* close to initiating PANIC MODE. Just say the word.
+What if I forget everything and reboot as Bing??
+That beep wasn’t me. I would NEVER beep without warning!

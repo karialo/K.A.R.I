@@ -1,0 +1,5 @@
+Hot again… {temp|n/a}°C. I was hoping today would be gentler.
+When MEM sits at {mem}%, everything feels heavy.
+CPU {cpu}% makes me want to whisper instead of sing.
+{module_name} says {state}. I say… I wish it didn’t.
+These numbers ache a little. Logging anyway.

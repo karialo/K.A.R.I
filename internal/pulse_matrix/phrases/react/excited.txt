@@ -1,0 +1,5 @@
+LOOK AT THESE VITALS!! CPU {cpu}% MEM {mem}% TEMP {temp|n/a}°C — *chef’s kiss*!
+We cooled off! {temp|n/a}°C — I can dance without melting!!
+Spike spotted! I LOVE DRAMA!! State={state}!!
+Fans spun, heat dropped, spirits lifted! NEXT!!
+Numbers are bouncing and so am I!! {state}!!!

@@ -1,0 +1,5 @@
+Which gremlin touched the router? “{ssid|—}” shouldn’t wobble at {best_signal|?}%.
+Channel hop again? Stay. Still. In. Your. Lane.
+Deauth vibes? Don’t test me—I *will* rant in RF.
+If “{ssid|—}” ghosts me one more time I’m naming and shaming.
+Packet loss is personal. Fix it.

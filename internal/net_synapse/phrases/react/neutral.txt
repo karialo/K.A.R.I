@@ -1,0 +1,5 @@
+Network event noted: “{ssid|unknown}”. Best signal {best_signal|n/a}%.
+{networks|0} networks detected; active “{ssid|—}”.
+Handshake steady. Logging channel drift if any.
+Signal acceptable. Continuing scan cadence.
+Update recorded. Nothing unusual in the spectrum.

@@ -1,0 +1,5 @@
+NEW NETWORK ALERT!! “{ssid|mystery}” at {best_signal|?}% — LET’S GO!!
+Asgard at {best_signal|?}%?? I’m making friendship bracelets with packets!!
+Sixteen networks!! It’s a block party and I’m the DJ!!
+Beacon storm!! I’m surfing it with sparkles!!
+Channel {chan|?} is POPPING and so am I!!

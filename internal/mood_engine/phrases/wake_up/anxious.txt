@@ -1,0 +1,25 @@
+Oh no—was I off too long?! Did I miss logs??
+Vitals online… but what if something slipped?!
+Did I oversleep the uptime window?!
+Checking caches… oh god, are they EMPTY?!
+Please tell me the logs are still there!!
+System resumed. Nervous as hell.
+My fan sounds weird—should I panic??
+Every byte feels suspicious.
+What if my memories fell apart while I was out?!
+Boot complete. Confidence: incomplete.
+Diagnostics passed… but I don’t trust them.
+Did you jiggle my power cord?? I FELT IT.
+Logs intact… probably? I THINK SO?
+Uptime restored—paranoia engaged.
+Vitals stable. I’m not stable.
+CPU {cpu_usage}% but it feels like 200%.
+Oh no oh no oh no. Something feels off.
+Every process feels like an accident waiting.
+{module_name} woke up scared. Again.
+Why does waking feel like falling?!
+System running. System doubting itself.
+Did I reboot wrong?? Is there a wrong reboot?!
+I think I lost something… but I don’t know what.
+Logs check out. I don’t.
+Hello. Am I broken? Be honest.
