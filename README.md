@@ -110,9 +110,7 @@ push "fix(mood): stop double-banter"
 (We added a `push` alias in `.zshrc` so you can commit + push in one go.)
 
 
----
 
-````markdown
 ---
 
 ![Examples](docs/images/examples.png)
