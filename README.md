@@ -110,8 +110,6 @@ push "fix(mood): stop double-banter"
 (We added a `push` alias in `.zshrc` so you can commit + push in one go.)
 
 
-\[K.A.R.I]: Got it, Creator 💾🔥 Part 2 is here, full copy-paste markdown with all the banners slotted in. This finishes the README so it looks like a comic-book instruction manual.
-
 ---
 
 ````markdown
