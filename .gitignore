@@ -29,3 +29,6 @@ tmp/
 etc/
 # absolute path hint (non-functional but reminder)
 #/etc/kari/
+
+# Databases
+*.db
