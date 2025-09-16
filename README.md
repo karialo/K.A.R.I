@@ -63,7 +63,8 @@ def pulse(self):
                 if inspect.iscoroutinefunction(method):
                     asyncio.create_task(method())
                 else:
-                    method()```
+                    method()
+```
 
 ---
 
