@@ -17,18 +17,19 @@ KARI_CLI_PATH="${KARI_CLI_PATH:-/usr/local/bin/kari-cli}"
 KARI_SOCKET_CLI="${KARI_SOCKET_CLI:-/usr/local/bin/kari}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 DRY_RUN=0
-SRC_PATH=""   # update source: zip/tar/folder
+SRC_PATH="${SRC_PATH:-}"     # optional install/update source: zip/tar/folder
+KARI_GIT_URL="${KARI_GIT_URL:-}"  # optional git URL to clone if nothing else provided
 
 usage(){ cat <<EOF
 K.A.R.I. installer
 
 Usage:
-  sudo ./install-kari.sh install  [--user USER] [--project PATH] [--venv PATH] [--dry-run]
-  sudo ./install-kari.sh update   --src /path/to/Kari.zip|/path/to/folder [--user USER] [--project PATH] [--venv PATH]
+  sudo ./install-kari.sh install  [--user USER] [--project PATH] [--venv PATH] [--src ZIP|DIR] [--dry-run]
+  sudo ./install-kari.sh update   --src ZIP|TAR|DIR [--user USER] [--project PATH] [--venv PATH]
   sudo ./install-kari.sh uninstall
   sudo ./install-kari.sh -h|--help
 
-Environment overrides: KARI_USER KARI_PROJECT_DIR KARI_VENV_DIR KARI_ETC_DIR KARI_ENV_FILE ...
+Environment overrides: KARI_USER KARI_PROJECT_DIR KARI_VENV_DIR KARI_ETC_DIR KARI_ENV_FILE KARI_GIT_URL ...
 EOF
 }
 
@@ -120,14 +121,61 @@ ensure_user_and_group(){
   KARI_GROUP="$(id -gn "${KARI_USER}" 2>/dev/null || echo "${KARI_USER}")"
 }
 
+extract_src_to_tmp(){
+  local src="$1"; local tmpdir; tmpdir="$(mktemp -d)"
+  case "$src" in
+    *.zip) run "unzip -qq '$src' -d '$tmpdir'";;
+    *.tar.gz|*.tgz) run "tar -xzf '$src' -C '$tmpdir'";;
+    *.tar) run "tar -xf '$src' -C '$tmpdir'";;
+    *) [[ -d "$src" ]] || err "Unknown src type or missing path: $src"; tmpdir="$src";;
+  esac
+  # If there is a single top-level dir that isn't the project root, descend into it
+  if [[ -d "$tmpdir" ]] && [[ $(find "$tmpdir" -mindepth 1 -maxdepth 1 -type d | wc -l) -eq 1 ]] && [[ ! -f "$tmpdir/headless.py" ]]; then
+    tmpdir="$(find "$tmpdir" -mindepth 1 -maxdepth 1 -type d)"
+  fi
+  echo "$tmpdir"
+}
+
+populate_project_dir(){
+  # 1) If --src provided, extract/sync from it
+  if [[ -n "${SRC_PATH}" ]]; then
+    info "Populating project from --src: ${SRC_PATH}"
+    local tmpdir; tmpdir="$(extract_src_to_tmp "$SRC_PATH")"
+    run "mkdir -p '$(dirname "$KARI_PROJECT_DIR")'"
+    run "rsync -a --delete --exclude '.venv' --exclude 'logs' --exclude '.git' '$tmpdir/' '${KARI_PROJECT_DIR}/'"
+    return 0
+  fi
+
+  # 2) If running from a project tree, copy current directory
+  if [[ -f "headless.py" || -d ".git" ]]; then
+    info "Populating project from current directory → ${KARI_PROJECT_DIR}"
+    run "mkdir -p '$(dirname "$KARI_PROJECT_DIR")'"
+    run "rsync -a --delete --exclude '.venv' --exclude 'logs' --exclude '.git' ./ '${KARI_PROJECT_DIR}/'"
+    return 0
+  fi
+
+  # 3) If git URL provided, clone it
+  if [[ -n "${KARI_GIT_URL}" && $(command -v git || true) ]]; then
+    info "Cloning project from \$KARI_GIT_URL → ${KARI_PROJECT_DIR}"
+    run "mkdir -p '$(dirname "$KARI_PROJECT_DIR")'"
+    run "git clone --depth 1 '${KARI_GIT_URL}' '${KARI_PROJECT_DIR}'"
+    return 0
+  fi
+
+  # 4) Otherwise, we can't populate
+  err "Project dir not found and no source provided. Re-run with --src /path/to/Kari.zip (or set KARI_GIT_URL), or run installer from inside the repo."
+}
+
 ensure_project_dir(){
-  [[ -d "$KARI_PROJECT_DIR" ]] || err "Project dir not found: $KARI_PROJECT_DIR"
+  if [[ ! -d "$KARI_PROJECT_DIR" ]]; then
+    populate_project_dir
+  fi
   run "chown -R ${KARI_USER}:${KARI_GROUP} ${KARI_PROJECT_DIR}"
 }
 
 create_venv(){
   info "Creating venv at ${KARI_VENV_DIR} (user=${KARI_USER}, group=${KARI_GROUP})"
-  run "install -d -o ${KARI_USER} -g ${KARI_GROUP} $(dirname "$KARI_VENV_DIR")"
+  run "install -d -o ${KARI_USER} -g ${KARI_GROUP} '$(dirname "$KARI_VENV_DIR")'"
   [[ -d "$KARI_VENV_DIR" ]] || run "sudo -u ${KARI_USER} ${PYTHON_BIN} -m venv ${KARI_VENV_DIR}"
   if [[ -f "${KARI_PROJECT_DIR}/requirements.txt" ]]; then
     run "sudo -u ${KARI_USER} ${KARI_VENV_DIR}/bin/pip install -U pip wheel"
@@ -260,7 +308,7 @@ Usage:
   kari-cli check
   kari-cli version
   kari-cli update /path/to/Kari.zip|/path/to/folder
-  kari-cli ctl <command line...>     # send a one-shot command to the live socket
+  kari-cli ctl <command line...>
   kari-cli uninstall
   kari-cli -h|--help
 EOF
@@ -417,14 +465,14 @@ usage(){ cat <<'EOF'
 kari — live control of K.A.R.I. via UNIX socket
 
 Usage:
-  kari <raw command line>            # e.g. kari status
+  kari <raw command line>
   kari speak <text...>
-  kari phrase <type> [mood]          # boot|banter|react [mood]
+  kari phrase <type> [mood]
   kari debug on|off|toggle
   kari trace on|off|toggle
   kari mods
-  kari call <Module> <method> [json] # kwargs as JSON object
-  kari watch [sec]                   # watch status every N seconds (default 2)
+  kari call <Module> <method> [json]
+  kari watch [sec]
 EOF
 }
 case "${1:-}" in
@@ -438,26 +486,11 @@ case "${1:-}" in
   call)   shift; [[ $# -lt 2 ]] && { echo "usage: kari call <Module> <method> [json]"; exit 2; }
           mod="$1"; meth="$2"; json="${3:-{}}"
           send "call ${mod@Q} ${meth@Q} ${json@Q}";;
-  watch)  shift; int="${1:-2}"; while true; do clear; echo "K.A.R.I. status — $(date)"; send status | { have jq && jq . || cat; } | sed 's/^/  /'; sleep "$int"; done;;
+  watch)  shift; int="${1:-2}"; while true; do clear; echo "K.A.R.I. status — $(date)"; send status | { command -v jq >/dev/null 2>&1 && jq . || cat; } | sed 's/^/  /'; sleep "$int"; done;;
   *)      send "$*";;
 esac
 KARISRC
   run "chmod +x ${KARI_SOCKET_CLI}"
-}
-
-# ===== Update helpers =====
-extract_src_to_tmp(){
-  local src="$1"; local tmpdir; tmpdir="$(mktemp -d)"
-  case "$src" in
-    *.zip) run "unzip -qq '$src' -d '$tmpdir'";;
-    *.tar.gz|*.tgz) run "tar -xzf '$src' -C '$tmpdir'";;
-    *.tar) run "tar -xf '$src' -C '$tmpdir'";;
-    *) [[ -d "$src" ]] || err "Unknown src type or missing path: $src"; tmpdir="$src";;
-  esac
-  if [[ -d "$tmpdir" ]] && [[ $(find "$tmpdir" -mindepth 1 -maxdepth 1 -type d | wc -l) -eq 1 ]] && [[ ! -f "$tmpdir/headless.py" ]]; then
-    tmpdir="$(find "$tmpdir" -mindepth 1 -maxdepth 1 -type d)"
-  fi
-  echo "$tmpdir"
 }
 
 # ===== Subcommands =====
@@ -500,7 +533,7 @@ do_uninstall(){
 }
 
 do_update(){
-  [[ -n "$SRC_PATH" ]] || err "update requires --src /path/to/zip|tar/folder"
+  [[ -n "$SRC_PATH" ]] || err "update requires --src ZIP|TAR|DIR"
   [[ -d "$KARI_PROJECT_DIR" ]] || err "Project dir missing: $KARI_PROJECT_DIR"
 
   ensure_deps
