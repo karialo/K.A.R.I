@@ -109,24 +109,23 @@ push "fix(mood): stop double-banter"
 
 (We added a `push` alias in `.zshrc` so you can commit + push in one go.)
 
-
-
 ---
 
 ![Examples](docs/images/examples.png)
 
 ## 📚 Examples
 
-K.A.R.I isn’t just some boring background daemon.  
-She’s built for **banter, automation, and chaos**.  
+K.A.R.I isn’t just some boring background daemon.
+She’s built for **banter, automation, and chaos**.
 
 Some fun things she can already do:
-- Mood-based phrases pulled from `phrases/`.
-- Random banter on command:  
+
+* Mood-based phrases pulled from `phrases/`.
+* Random banter on command:
+
   ```bash
   kari phrase banter
-```
-
+  ```
 * Sanity Relay checks (keeps her from overloading on sass).
 * VoiceBox dispatcher (spits lines in proper moods).
 * System log integration:
@@ -213,4 +212,7 @@ Don’t worry — K.A.R.I’s got you (probably).
 Remember: if all else fails, try turning it off and on again.
 (Or offer me snacks.)
 
+```
+
+---
 
