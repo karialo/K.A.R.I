@@ -1,108 +1,69 @@
-
 # ⚡ K.A.R.I
 
 ![Welcome](docs/images/welcome.png)
 
 > **K.A.R.I** (Knowledgeable Autonomous Reactive Interface)  
-> A sass-driven, modular AI system that runs as a Linux service, banters on command, self-updates via GitHub, and thrives on chaos.  
+> A sass-driven, modular AI system that runs as a Linux service, banters on command, self-updates via GitHub, and thrives on chaos.
 
 ---
 
 ## 🖤 What is K.A.R.I?
 
-K.A.R.I isn’t a single program — she’s an **ecosystem**.  
-At the heart sits the **DEVIL Core**, which drives everything else. Around it, organs and prosthetics (modules) plug in to give her powers: speech, mood, memory, network sense, heartbeat, and more.
+K.A.R.I isn’t one binary—she’s an **ecosystem**.  
+At the center lives the **D.E.V.I.L. Core** (the conductor). Around it, “organs” (internal modules) and “prosthetics” (your add-ons) plug in to give her new abilities.
 
-Think of her like a biomechanical body:
-- **Core (DEVIL Core)** → brain + pulse system.
-- **Internals** → essential modules (VoiceBox, Net Synapse, Pulse Matrix, Sanity Relay).
-- **Prosthetics** → optional add-ons you build yourself.
-- **Personality Packs** → mood-based phrases & reactions.
+- **DEVIL Core** — loader, orchestrator, socket server, and **pulse dispatcher**.  
+- **Organs** (`internal/`) — essential modules that always ship (VoiceBox, Memory Cortex, Net Synapse, etc).  
+- **Prosthetics** (`prosthetics/`) — optional modules you add.  
+- **Personality packs** — mood-scoped phrase files (angry, happy, glitched…) that drive banter.
 
----
-
-## 🔌 How the Module System Works
-
-Every module is just Python with metadata.  
-Each has:
-- A **name** and **version** (for updater tracking).
-- One or more **phrase packs** (lines of sass, mood, or speech).
-- Optional **logic** (code that runs inside the Pulse system).
-
-K.A.R.I loads modules in layers:
-1. **Internals** (`internal/`) are always loaded modules.
-2. **Prosthetics** (`prosthetics/`) are optional and modular.
-3. **Phrases** cascade through a fallback chain (module → personality → core).
-
-This means you can:
-- Write a new organ that handles sensors, APIs, or wild experiments.
-- Create a prosthetic that adds a whole new “organ” for fun.
-- Swap personalities by just editing `.txt` files.
+> Note: There is also a **Pulse Matrix** internal module that tracks *vitals* (CPU, mem, temps).  
+> The **DEVIL Core pulse dispatcher** described below is separate—it’s the tick system that runs your code.
 
 ---
 
-## 🧰 mod-gen — Your Blueprint Factory
+## 🔌 How modules load
 
-Want to make a new module? Don’t start from scratch.  
-Run:
-```bash
-python3 utils/mod_gen.py [module_name] [internal/prosthetic] [function_1] [function_2] [etc]
-```
-example:
-```
-python3 utils/mod_gen.py port_scanner prosthetic scan_network report_alive_hosts attempt_connection
-```
+On boot, DEVIL Core scans `internal/` and `prosthetics/` and loads any Python file that has:
 
-if you have installed K.A.R.I, you can also do it directly:
-```
-kari-cli module new [Name] --type [internal|prosthetic] --action [action_1] [action_2]
-```
-example:
-```
-kari-cli module new Testing --type prosthetic --action scan_test
-```
+- a top-level `meta_data` dict, and  
+- a class named after the file in `CapWords` (e.g. `voice_box.py` → class `VoiceBox`).
 
-
-This creates a ready-to-go **blueprint folder** with:
-
-* `module.py` — skeleton code with metadata and hooks.
-* `phrases/` — pre-made mood folders (angry, excited, glitched, etc).
-* Boilerplate comments to guide you.
-
-From there, all you need to do is:
-
-* Add your logic to `module.py`.
-* Fill the phrase files with your own lines.
-* When the plugin is created, it will automatically be placed in whatever [Type] you gave it, internals will be in the internal folder, prosthetics in the prosthetics folder (duh)
-
-It’s like LEGO — click your module into her ecosystem and watch it run.
+While attaching, DEVIL Core:
+- binds `module.core = self` so modules can talk to the Core,  
+- calls `init()` (sync) and/or `initialize()` (async) if present,  
+- propagates `debug`/`trace`,  
+- marks readiness, and  
+- tries to speak a boot line via VoiceBox (with phrase fallbacks).
 
 ---
 
-## ⏱️ Pulse System — K.A.R.I’s Heartbeat
+## ⏱️ DEVIL Core **Pulse Dispatcher** (the heartbeat loop)
 
-Inside DEVIL Core lives the **Pulse Matrix**, her heartbeat.
-Every tick of the pulse:
+The runtime loop in `DEVILCore.run_forever()` ticks on an interval (defaults to **5s**, configurable).  
+On every tick it calls `DEVILCore.pulse()`, which:
 
-1. Updates mood state.
-2. Refreshes logs.
-3. Cycles through active modules, letting them react.
-4. Dispatches scheduled actions (speak, think, update).
+1. Bumps `tick_count` and exposes it at `core.data_store["tick"]`.  
+2. Iterates **every attached module**.  
+3. Reads `module.meta_data["pulse"]` (a list of method names to invoke each tick).  
+4. Calls each method (async methods are scheduled with `asyncio.create_task`, sync methods run inline).  
+5. Logs errors as WARNs without crashing the loop.
 
-This keeps her **alive and reactive**, not just sitting idle.
-Modules don’t have to run loops or threads — they just plug into the Pulse and react when it’s their turn.
-This keeps the system lightweight, predictable, and easy to extend.
+> ⚠️ Keep pulse work **short**. Heavy/slow I/O should be async or throttled inside your method.
 
----
-
-⚡ Bottom line: K.A.R.I is **yours to extend**.
-Want her to:
-
-* Control lights? Write a prosthetic module.
-* Post memes to Discord? Drop in a Net Synapse submodule.
-* Judge your outfit of the day? Add some banter lines.
-
-With the DEVIL Core + Pulse keeping time, everything plugs in like organs to a living system.
+**Excerpt (simplified)**:
+```python
+def pulse(self):
+    self.tick_count += 1
+    self.data_store["tick"] = self.tick_count
+    for mod in list(self.modules.values()):
+        for action in mod.meta_data.get("pulse", []):
+            method = getattr(mod, action, None)
+            if callable(method):
+                if inspect.iscoroutinefunction(method):
+                    asyncio.create_task(method())
+                else:
+                    method()```
 
 ---
 
