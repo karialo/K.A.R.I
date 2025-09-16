@@ -73,7 +73,7 @@ From there, all you need to do is:
 
 * Add your logic to `module.py`.
 * Fill the phrase files with your own lines.
-* Drop it into `prosthetics/` and K.A.R.I will pick it up.
+* When the plugin is created, it will automatically be placed in whatever [Type] you gave it, internals will be in the internal folder, prosthetics in the prosthetics folder (duh)
 
 It’s like LEGO — click your module into her ecosystem and watch it run.
 
