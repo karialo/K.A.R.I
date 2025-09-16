@@ -15,7 +15,7 @@ At the heart sits the **DEVIL Core**, which drives everything else. Around it, o
 
 Think of her like a biomechanical body:
 - **Core (DEVIL Core)** → brain + pulse system.
-- **Organs** → essential modules (VoiceBox, Net Synapse, Pulse Matrix, Sanity Relay).
+- **Internals** → essential modules (VoiceBox, Net Synapse, Pulse Matrix, Sanity Relay).
 - **Prosthetics** → optional add-ons you build yourself.
 - **Personality Packs** → mood-based phrases & reactions.
 
