@@ -30,7 +30,7 @@ Each has:
 - Optional **logic** (code that runs inside the Pulse system).
 
 K.A.R.I loads modules in layers:
-1. **Core organs** (`internal/`) are always loaded.
+1. **Internals** (`internal/`) are always loaded modules.
 2. **Prosthetics** (`prosthetics/`) are optional and modular.
 3. **Phrases** cascade through a fallback chain (module → personality → core).
 
@@ -47,6 +47,10 @@ Want to make a new module? Don’t start from scratch.
 Run:
 ```bash
 python3 utils/mod_gen.py [module_name] [internal/prosthetic] [function_1] [function_2] [etc]
+```
+example:
+```
+python3 utils/mod_gen.py port_scanner prosthetic scan_network report_alive_hosts attempt_connection
 ```
 
 This creates a ready-to-go **blueprint folder** with:
