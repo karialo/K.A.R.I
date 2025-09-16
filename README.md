@@ -15,11 +15,11 @@
 
 ---
 
+<!-- Replace with actual image paths 
 ## 📸 Screenshots / Previews
-<!-- Replace with actual image paths -->
 ![Boot Screen](docs/images/boot.png)
 ![Banter Example](docs/images/banter.png)
-
+-->
 ---
 
 ## 🚀 Installation
