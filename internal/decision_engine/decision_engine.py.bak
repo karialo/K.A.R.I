@@ -14,7 +14,7 @@ except Exception:
     MemoryCortex = None  # type: ignore
 
 meta_data = {
-    "name": "DecisionEngine",
+    "name": "Decision Engine",
     "version": "1.1",
     "author": "Hraustligr + K.A.R.I.",
     "description": "Picks and triggers helpful actions across modules using scores, gates, and cooldowns.",
@@ -29,58 +29,7 @@ meta_data = {
     ],
     "pulse": ["pulse"],
     "capabilities": ["neural_sync"],
-    "resources": ["defcon", "mood", "cpu_usage", "mem_usage", "networks"],
-    "help": {
-        "_module": (
-            "Decision Engine scores potential actions across modules, respecting mood,"
-            " DEFCON, cooldowns, and quiet hours.\n\n"
-            "Use JSON kwargs or simple strings when invoking actions. Many helpers expect"
-            " shared_data to be populated by other modules."
-        ),
-        "tick": (
-            "Usage:\n"
-            "  tick\n\n"
-            "Runs one planner cycle: fetches shared data, picks the best action via"
-            " `plan()`, and executes it if allowed. Called automatically from pulse/loop."
-        ),
-        "evaluate": (
-            "Usage:\n"
-            "  evaluate [snapshot=<json>]\n\n"
-            "JSON example:\n"
-            "  {\"snapshot\": {\"mood\": \"happy\", \"cpu_usage\": 12}}\n\n"
-            "Returns a map of action name to score. Provide a snapshot to override the"
-            " live shared_data sample."
-        ),
-        "plan": (
-            "Usage:\n"
-            "  plan [snapshot=<json>]\n\n"
-            "Returns the highest scoring action (or null if nothing qualifies)."
-        ),
-        "execute": (
-            "Usage:\n"
-            "  execute <action_name> [snapshot=<json>]\n\n"
-            "Runs the configured action (voice line or module call). Automatically records"
-            " the outcome with Sanity Relay when available."
-        ),
-        "report_alive": (
-            "Usage:\n"
-            "  report_alive\n\n"
-            "Logs an operational heartbeat."
-        ),
-        "display_info": (
-            "Usage:\n"
-            "  display_info\n\n"
-            "Logs metadata fields such as version and description."
-        ),
-        "set_quiet_hours": (
-            "Usage:\n"
-            "  set_quiet_hours <enabled> [start] [end]\n\n"
-            "JSON example:\n"
-            "  {\"enabled\": true, \"start\": 1, \"end\": 6}\n\n"
-            "Configures quiet hours (24h clock). When enabled, `tick()` will skip action"
-            " selection between start and end."
-        ),
-    },
+    "resources": ["defcon", "mood", "cpu_usage", "mem_usage", "networks"]
 }
 
 
@@ -199,14 +148,6 @@ class DecisionEngine:
     def set_quiet_hours(self, enabled: bool, start: int = 2, end: int = 6):
         self._quiet_hours = {"enabled": enabled, "start": start % 24, "end": end % 24}
         log_system(f"Quiet hours set: {self._quiet_hours}", source=self.name)
-
-    def help(self, topic: str | None = None) -> str:
-        """Return help text stored in meta_data['help']."""
-        help_map = getattr(self, "meta_data", {}).get("help", {})
-        if not topic:
-            return help_map.get("_module", f"{self.name} - no help available.")
-        key = topic.replace("-", "_")
-        return help_map.get(key, f"No help for '{topic}'.")
 
     # ---------- helpers ----------
     def _voice(self):

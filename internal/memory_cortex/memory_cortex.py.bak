@@ -18,7 +18,7 @@ from core.logger import log_system, log_kari_async
 # Metadata Declaration
 # ----------------------------------------------------------------------------------
 meta_data = {
-    "name": "MemoryCortex",
+    "name": "Memory Cortex",
     "version": "1.6.3",  # safer placeholder parsing + defaults; minor cleanups
     "author": "Hraustligr",
     "description": "Persistent memory engine for logs, mood, diary, events, and dynamic phrase interpolation.",
@@ -38,157 +38,7 @@ meta_data = {
     ],
     "pulse": ["pulse"],
     "capabilities": ["neural_sync"],
-    "resources": [],
-    "help": {
-        "_module": (
-            "Memory Cortex persists logs, diary entries, mood state, and phrase templates"
-            " inside kari_memory.db.\n\n"
-            "Calls accept JSON kwargs or a space separated argument string. Text fields"
-            " are stored exactly as provided, so quote multi-word values when using the CLI."
-        ),
-        "remember": (
-            "Usage:\n"
-            "  remember <key> <value>\n\n"
-            "JSON example:\n"
-            "  {\"key\": \"favorite_color\", \"value\": \"teal\"}\n\n"
-            "Persists a key/value pair. Existing keys are overwritten."
-        ),
-        "recall": (
-            "Usage:\n"
-            "  recall <key>\n\n"
-            "Returns the stored value for the key or null if missing."
-        ),
-        "forget": (
-            "Usage:\n"
-            "  forget <key>\n\n"
-            "Deletes a single key/value entry."
-        ),
-        "forget_all_memory": (
-            "Usage:\n"
-            "  forget_all_memory\n\n"
-            "Clears the entire key/value table. Irreversible."
-        ),
-        "log_event": (
-            "Usage:\n"
-            "  log_event <source> <level> <message>\n\n"
-            "JSON example:\n"
-            "  {\"source\": \"Net Synapse\", \"level\": \"INFO\", \"message\": \"scan complete\"}\n\n"
-            "Appends a structured log line to the cortex log table. Levels are uppercased"
-            " automatically."
-        ),
-        "get_logs": (
-            "Usage:\n"
-            "  get_logs [level] [limit]\n\n"
-            "JSON example:\n"
-            "  {\"log_type\": \"ERROR\", \"limit\": 25}\n\n"
-            "Returns recent log rows. Provide a level to filter, and limit (default 100)."
-        ),
-        "clear_logs": (
-            "Usage:\n"
-            "  clear_logs\n\n"
-            "Deletes every log row. Intended for maintenance."
-        ),
-        "write_diary": (
-            "Usage:\n"
-            "  write_diary <mood> <entry text>\n\n"
-            "JSON example:\n"
-            "  {\"mood\": \"happy\", \"entry\": \"Great day at the lab\"}\n\n"
-            "Adds a diary entry with the supplied mood and text. Timestamp is auto-filled."
-        ),
-        "get_diary": (
-            "Usage:\n"
-            "  get_diary [limit]\n\n"
-            "Returns the most recent diary entries (default 50)."
-        ),
-        "delete_diary_entry": (
-            "Usage:\n"
-            "  delete_diary_entry <id>\n\n"
-            "Removes a diary row by numeric id."
-        ),
-        "log_event_type": (
-            "Usage:\n"
-            "  log_event_type <type> <data>\n\n"
-            "JSON example:\n"
-            "  {\"event_type\": \"scan\", \"data\": \"{\\\"ssid\\\":\\\"LabNet\\\"}\"}\n\n"
-            "Stores a typed event payload in the events table. Data can be plain text or"
-            " serialized JSON."
-        ),
-        "get_events": (
-            "Usage:\n"
-            "  get_events [event_type] [limit]\n\n"
-            "JSON example:\n"
-            "  {\"event_type\": \"scan\", \"limit\": 10}\n\n"
-            "Returns recent events. Provide a type to filter; limit defaults to 100."
-        ),
-        "delete_event": (
-            "Usage:\n"
-            "  delete_event <id>\n\n"
-            "Deletes a single event record by id."
-        ),
-        "get_current_mood": (
-            "Usage:\n"
-            "  get_current_mood\n\n"
-            "Returns the persisted mood string (defaults to 'neutral' if unset)."
-        ),
-        "set_current_mood": (
-            "Usage:\n"
-            "  set_current_mood <mood>\n\n"
-            "JSON example:\n"
-            "  {\"mood\": \"anxious\"}\n\n"
-            "Saves the active mood and, when VoiceBox is ready, speaks a gentle react line."
-        ),
-        "format_phrase": (
-            "Usage:\n"
-            "  format_phrase <phrase with {placeholders}> [json context]\n\n"
-            "JSON example:\n"
-            "  {\"phrase\": \"CPU {cpu}%\", \"context\": {\"cpu\": 72}}\n\n"
-            "Applies placeholder substitution using shared context helpers."
-        ),
-        "speak": (
-            "Usage:\n"
-            "  speak [tag] [--mood mood] [--return-only 1]\n\n"
-            "JSON example:\n"
-            "  {\"tag\": \"react\", \"mood\": \"happy\", \"return_only\": true}\n\n"
-            "Selects a phrase file entry, formats placeholders, logs it, and either returns"
-            " the line or asks VoiceBox to speak it."
-        ),
-        "react": (
-            "Usage:\n"
-            "  react [module_name]\n\n"
-            "JSON example:\n"
-            "  {\"module_name\": \"Net Synapse\"}\n\n"
-            "Convenience helper that routes to `speak(tag='react')` using module phrases."
-        ),
-        "get_phrase": (
-            "Usage:\n"
-            "  get_phrase <tag> [--mood mood]\n\n"
-            "JSON example:\n"
-            "  {\"tag\": \"banter\", \"mood\": \"neutral\"}\n\n"
-            "Returns a random phrase line without speaking it."
-        ),
-        "parse_placeholders": (
-            "Usage:\n"
-            "  parse_placeholders <phrase> [json context]\n\n"
-            "JSON example:\n"
-            "  {\"phrase\": \"Hello {name}\", \"context\": {\"name\": \"Kari\"}}\n\n"
-            "Renders template strings using Memory Cortex context rules."
-        ),
-        "close": (
-            "Usage:\n"
-            "  close\n\n"
-            "Closes the SQLite connection cleanly."
-        ),
-        "report_alive": (
-            "Usage:\n"
-            "  report_alive\n\n"
-            "Logs an operational heartbeat line."
-        ),
-        "display_info": (
-            "Usage:\n"
-            "  display_info\n\n"
-            "Logs metadata fields (name, version, author, description)."
-        ),
-    },
+    "resources": []
 }
 
 # --- tiny neutral guard (mirrors VoiceBox’s vibe) -------------------------------
@@ -663,14 +513,6 @@ class MemoryCortex:
     def display_info(self):
         for k, v in self.meta_data.items():
             self.log(f"{k}: {v}")
-
-    def help(self, topic: str | None = None) -> str:
-        """Return help text stored in meta_data['help']."""
-        help_map = getattr(self, "meta_data", {}).get("help", {})
-        if not topic:
-            return help_map.get("_module", f"{self.name} - no help available.")
-        key = topic.replace("-", "_")
-        return help_map.get(key, f"No help for '{topic}'.")
 
     def pulse(self):
         if hasattr(self, "core") and hasattr(self.core, "data_store"):

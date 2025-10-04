@@ -7,7 +7,7 @@ from internal.memory_cortex.memory_cortex import MemoryCortex
 from internal.sanity_relay.models.mood_model import FakeMoodModel
 
 meta_data = {
-    "name": "SanityRelay",
+    "name": "Sanity Relay",
     "version": "1.7",
     "author": "Hraustligr",
     "description": "K.A.R.I.'s reflective sanity and ethical inference core. Predicts mood, monitors behavior, and influences internal state.",
@@ -23,69 +23,7 @@ meta_data = {
     ],
     "pulse": ["pulse"],
     "capabilities": ["neural_sync", "sentience"],
-    "resources": ["cpu_usage", "mem_usage", "interaction_count"],
-    "help": {
-        "_module": (
-            "Sanity Relay watches shared data, predicts mood drift, and nudges other"
-            " modules to keep K.A.R.I. grounded.\n\n"
-            "All actions accept JSON kwargs or simple CLI strings. Many methods interact"
-            " with Memory Cortex and Mood Engine, so run them when those modules are loaded."
-        ),
-        "predict": (
-            "Usage:\n"
-            "  predict\n\n"
-            "Runs the loaded mood model (or FakeMoodModel fallback) using cpu_usage,"
-            " mem_usage, and interaction_count from shared data. Logs and returns the"
-            " predicted mood string."
-        ),
-        "evaluate_self": (
-            "Usage:\n"
-            "  evaluate_self\n\n"
-            "Performs a lightweight integrity audit and logs the timestamped results."
-        ),
-        "get_status_report": (
-            "Usage:\n"
-            "  get_status_report\n\n"
-            "Returns a dictionary describing loaded models, shared keys, readiness, and"
-            " influence timers. Useful for dashboards."
-        ),
-        "generate_conscience_banter": (
-            "Usage:\n"
-            "  generate_conscience_banter\n\n"
-            "Async helper that asks Memory Cortex to speak a conscience-flavored banter"
-            " line using the current mood context."
-        ),
-        "influence_mood": (
-            "Usage:\n"
-            "  influence_mood [force=<0|1>]\n\n"
-            "JSON example:\n"
-            "  {\"force\": true}\n\n"
-            "Calls `predict()`, updates Memory Cortex with the new mood when it differs, and"
-            " nudges Mood Engine scores. Set force=true to apply even if the mood matches."
-        ),
-        "record_decision": (
-            "Usage:\n"
-            "  record_decision <context> <json input> <outcome>\n\n"
-            "JSON example:\n"
-            "  {\"context\": \"wifi_recon_dump\", \"input_data\": {\"networks\": 12}, \"outcome\": \"voice_only\"}\n\n"
-            "Stores a decision log entry (typically called by Decision Engine)."
-        ),
-        "report_alive": (
-            "Usage:\n"
-            "  report_alive\n\n"
-            "Writes a liveness message to the system log."
-        ),
-        "display_info": (
-            "Usage:\n"
-            "  display_info\n\n"
-            "Logs metadata info such as version and author."
-        ),
-        "show_shared_data": (
-            "Usage:\n"
-            "  show_shared_data\n\n"
-            "Dumps the current shared_data cache to debug logs when debug mode is enabled."
-        ),
-    },
+    "resources": ["cpu_usage", "mem_usage", "interaction_count"]
 }
 
 class SanityRelay:
@@ -199,14 +137,6 @@ class SanityRelay:
         else:
             self._debug("Shared data dump:")
             for k,v in self.shared_data.items(): self._debug(f" {k}: {v}")
-
-    def help(self, topic: str | None = None) -> str:
-        """Return help text stored in meta_data['help']."""
-        help_map = getattr(self, "meta_data", {}).get("help", {})
-        if not topic:
-            return help_map.get("_module", f"{self.name} - no help available.")
-        key = topic.replace("-", "_")
-        return help_map.get(key, f"No help for '{topic}'.")
 
     def collect_info(self):
         return {"Module Info": {

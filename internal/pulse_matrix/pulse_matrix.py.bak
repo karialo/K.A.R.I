@@ -16,7 +16,7 @@ from core.logger import log_system
 from internal.memory_cortex.memory_cortex import MemoryCortex
 
 meta_data = {
-    "name": "PulseMatrix",
+    "name": "Pulse Matrix",
     "version": "1.7.1",
     "author": "Hraustligr",
     "description": "Tracks vital system stats like CPU, memory, and thermal levels.",
@@ -28,31 +28,7 @@ meta_data = {
     ],
     "pulse": ["pulse"],
     "capabilities": ["neural_sync"],
-    "resources": ["cpu_usage", "mem_usage", "temperature"],
-    "help": {
-        "_module": (
-            "Pulse Matrix samples CPU, memory, and thermal stats, then routes them to"
-            " shared data, Mood Engine, and phrase systems.\n\n"
-            "Calls accept JSON kwargs or CLI strings; most use the psutil library when"
-            " available."
-        ),
-        "get_vitals": (
-            "Usage:\n"
-            "  get_vitals\n\n"
-            "Returns a dictionary with cpu_usage, mem_usage, mem_free, and temperature"
-            " (if sensors are available). Logs a warning if psutil is missing."
-        ),
-        "report_alive": (
-            "Usage:\n"
-            "  report_alive\n\n"
-            "Writes a liveness line to the system log."
-        ),
-        "display_info": (
-            "Usage:\n"
-            "  display_info\n\n"
-            "Logs module metadata (name, version, author, description)."
-        ),
-    },
+    "resources": ["cpu_usage", "mem_usage", "temperature"]
 }
 
 class PulseMatrix:
@@ -210,14 +186,6 @@ class PulseMatrix:
     def display_info(self):
         for key, value in self.meta_data.items():
             self.log(f"{key}: {value}")
-
-    def help(self, topic: str | None = None) -> str:
-        """Return help text stored in meta_data['help']."""
-        help_map = getattr(self, "meta_data", {}).get("help", {})
-        if not topic:
-            return help_map.get("_module", f"{self.name} - no help available.")
-        key = topic.replace("-", "_")
-        return help_map.get(key, f"No help for '{topic}'.")
 
     # ---------- vitals ----------
     def get_vitals(self) -> Dict[str, Any]:

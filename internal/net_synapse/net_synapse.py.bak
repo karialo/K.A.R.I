@@ -32,7 +32,7 @@ from core.logger import log_system
 from internal.memory_cortex.memory_cortex import MemoryCortex
 
 meta_data = {
-    "name": "NetSynapse",
+    "name": "Net Synapse",
     "version": "1.8.3",
     "author": "Hraustligr",
     "description": "Internal network scanner and signal monitor for K.A.R.I.",
@@ -48,98 +48,7 @@ meta_data = {
     ],
     "pulse": ["pulse"],
     "capabilities": ["neural_sync"],
-    "resources": ["networks"],
-    "help": {
-        "_module": (
-            "Net Synapse surveys nearby Wi-Fi, tracks signal health, and surfaces network"
-            " context for other modules.\n\n"
-            "Actions may shell out to tools like nmcli/ip/ping, so they inherit whatever"
-            " permissions the host grants."
-        ),
-        "initial_scan": (
-            "Usage:\n"
-            "  initial_scan\n\n"
-            "Runs a one-shot nmcli scan, logs strongest SSIDs per band, publishes results"
-            " into shared data, and emits info beats. Call at startup or on demand."
-        ),
-        "scan": (
-            "Usage:\n"
-            "  scan\n\n"
-            "Legacy alias retained for compatibility. Logs that a scan was requested; use"
-            " `initial_scan` for the full workflow."
-        ),
-        "log_signal": (
-            "Usage:\n"
-            "  log_signal\n\n"
-            "Compatibility stub that simply logs the action. Net Synapse now updates"
-            " signals automatically during pulses."
-        ),
-        "channel_map": (
-            "Usage:\n"
-            "  channel_map\n\n"
-            "Placeholder for historical exports. Currently logs the request only."
-        ),
-        "beacon_sweep": (
-            "Usage:\n"
-            "  beacon_sweep\n\n"
-            "Stub maintained for old scripts. Logs that a sweep was asked for."
-        ),
-        "deauth_probe": (
-            "Usage:\n"
-            "  deauth_probe\n\n"
-            "Performs an active deauth probe when `KARI_ALLOW_ACTIVE_NET=1`. Otherwise the"
-            " request is blocked and a warning is logged."
-        ),
-        "ifaces": (
-            "Usage:\n"
-            "  ifaces\n\n"
-            "Returns a JSON object describing network interfaces via `ip -j addr`. Helpful"
-            " for dashboards."
-        ),
-        "arp_table": (
-            "Usage:\n"
-            "  arp_table\n\n"
-            "Parses `ip neigh show` into a list of neighbors (ip/mac/dev/state)."
-        ),
-        "dns_check": (
-            "Usage:\n"
-            "  dns_check [host] [count]\n\n"
-            "JSON example:\n"
-            "  {\"host\": \"1.1.1.1\", \"count\": 5}\n\n"
-            "Pings the host (default 1.1.1.1) several times and returns latency samples"
-            " plus the average in milliseconds."
-        ),
-        "lan_sweep": (
-            "Usage:\n"
-            "  lan_sweep [cidr] [limit=<int>] [timeout_ms=<int>]\n\n"
-            "JSON example:\n"
-            "  {\"cidr\": \"192.168.1.0/24\", \"limit\": 128}\n\n"
-            "ICMP sweeps the local subnet (auto-detected if omitted) and lists responsive"
-            " hosts up to the specified limit."
-        ),
-        "recon_dump": (
-            "Usage:\n"
-            "  recon_dump\n\n"
-            "Collects interfaces, ARP neighbors, DNS timings, LAN sweep results, and Wi-Fi"
-            " scan data, then writes a timestamped JSON file under /kari/data/net. Path is"
-            " also written to shared data as `net_last_recon`."
-        ),
-        "report_alive": (
-            "Usage:\n"
-            "  report_alive\n\n"
-            "Logs an operational heartbeat line."
-        ),
-        "display_info": (
-            "Usage:\n"
-            "  display_info\n\n"
-            "Logs module metadata (name, version, author, description)."
-        ),
-        "show_shared_data": (
-            "Usage:\n"
-            "  show_shared_data\n\n"
-            "Prints the cached shared_data snapshot to the debug log."
-        ),
-    },
+    "resources": ["networks"]
 }
 
 DATA_DIR = "/kari/data/net"
@@ -390,14 +299,6 @@ class NetSynapse:
         self._debug("display_info()")
         for key, value in self.meta_data.items():
             log_system(f"{key}: {value}", source=self.name)
-
-    def help(self, topic: str | None = None) -> str:
-        """Return help text stored in meta_data['help']."""
-        help_map = getattr(self, "meta_data", {}).get("help", {})
-        if not topic:
-            return help_map.get("_module", f"{self.name} - no help available.")
-        key = topic.replace("-", "_")
-        return help_map.get(key, f"No help for '{topic}'.")
 
     def pulse(self):
         """Periodic rescan and change detection + quick recon surfaces."""

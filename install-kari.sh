@@ -35,15 +35,28 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --user) KARI_USER="$2"; KARI_HOME="/home/${KARI_USER}"; shift 2;;
-    --project) KARI_PROJECT_DIR="$2"; shift 2;;
-    --venv) KARI_VENV_DIR="$2"; shift 2;;
-    --dry-run) DRY_RUN=1; shift;;
-    --src) SRC_PATH="$2"; shift 2;;
-    -h|--help) usage; exit 0;;
-    *) echo "Unknown arg: $1"; usage; exit 1;;
+    --user)
+      KARI_USER="${2:-kari}"
+      KARI_HOME="/home/${KARI_USER}"
+      shift 2;;
+    --project)
+      KARI_PROJECT_DIR="${2:-/home/${KARI_USER}/Projects/KARI}"
+      shift 2;;
+    --venv)
+      KARI_VENV_DIR="${2:-/home/${KARI_USER}/.venvs/kari}"
+      shift 2;;
+    --dry-run)
+      DRY_RUN=1; shift;;
+    --src)
+      SRC_PATH="${2:-.}"  # 👈 default to current dir if omitted
+      shift 2;;
+    -h|--help)
+      usage; exit 0;;
+    *)
+      echo "Unknown arg: $1"; usage; exit 1;;
   esac
 done
+
 
 run(){ [[ "$DRY_RUN" -eq 1 ]] && echo "DRY: $*" || eval "$@"; }
 info(){ echo ">>> $*"; }
@@ -443,10 +456,19 @@ CLISRC
 install_kari_client(){
   info "Installing kari → ${KARI_SOCKET_CLI}"
   run "install -d -m 0755 /usr/local/bin"
+
+  # Prefer repo script if present (keeps things versioned in git)
+  if [[ -f "${KARI_PROJECT_DIR}/scripts/kari" ]]; then
+    run "install -m 0755 '${KARI_PROJECT_DIR}/scripts/kari' '${KARI_SOCKET_CLI}'"
+    return
+  fi
+
+  # Fallback: embed client
   cat <<'KARISRC' | run "tee ${KARI_SOCKET_CLI} >/dev/null"
 #!/usr/bin/env bash
 set -euo pipefail
 SOCK="${KARI_SOCKET:-/run/kari/kari.sock}"
+
 have(){ command -v "$1" >/dev/null 2>&1; }
 send(){
   local line="$*"
@@ -461,33 +483,54 @@ send(){
     exit 3
   fi
 }
+render(){  # pretty print: text -> as-is, string result -> as-is, else pretty JSON
+  python - "$@" <<'PY'
+import sys, json
+data = sys.stdin.read()
+try:
+    resp = json.loads(data)
+except Exception:
+    print(data, end=""); sys.exit(0)
+# if server sent a friendly text field, show it raw (keeps \n)
+if isinstance(resp, dict) and resp.get("ok") and isinstance(resp.get("text"), str):
+    print(resp["text"]); sys.exit(0)
+# common pattern: result is a string
+if isinstance(resp, dict) and isinstance(resp.get("result"), str):
+    print(resp["result"]); sys.exit(0)
+print(json.dumps(resp, ensure_ascii=False, indent=2))
+PY
+}
 usage(){ cat <<'EOF'
 kari — live control of K.A.R.I. via UNIX socket
 
 Usage:
-  kari <raw command line>
+  kari <raw command line>       # e.g. kari status
   kari speak <text...>
-  kari phrase <type> [mood]
+  kari phrase <type> [mood]     # boot|banter|react [mood]
   kari debug on|off|toggle
   kari trace on|off|toggle
   kari mods
-  kari call <Module> <method> [json]
-  kari watch [sec]
+  kari call <Module> <method> [json]   # kwargs as JSON object or raw string
+  kari watch [sec]              # watch status every N seconds (default 2)
+
+Tips:
+  kari help                     # global help from DEVILCore
+  kari help <Module>            # module help (pretty-rendered)
 EOF
 }
 case "${1:-}" in
   ""|-h|--help) usage ;;
-  speak)  shift; send "speak $*";;
+  speak)  shift; send "speak $*" | render ;;
   phrase) shift; [[ $# -lt 1 ]] && { echo "usage: kari phrase <type> [mood]"; exit 2; }
-          [[ $# -eq 1 ]] && send "phrase $1" || send "phrase $1 $2";;
-  debug)  shift; [[ $# -gt 0 ]] && send "debug $1" || send "debug";;
-  trace)  shift; [[ $# -gt 0 ]] && send "trace $1" || send "trace";;
-  mods)   send "mods";;
+          [[ $# -eq 1 ]] && send "phrase $1" | render || send "phrase $1 $2" | render ;;
+  debug)  shift; [[ $# -gt 0 ]] && send "debug $1" | render || send "debug" | render ;;
+  trace)  shift; [[ $# -gt 0 ]] && send "trace $1" | render || send "trace" | render ;;
+  mods)   send "mods" | render ;;
   call)   shift; [[ $# -lt 2 ]] && { echo "usage: kari call <Module> <method> [json]"; exit 2; }
           mod="$1"; meth="$2"; json="${3:-{}}"
-          send "call ${mod@Q} ${meth@Q} ${json@Q}";;
-  watch)  shift; int="${1:-2}"; while true; do clear; echo "K.A.R.I. status — $(date)"; send status | { command -v jq >/dev/null 2>&1 && jq . || cat; } | sed 's/^/  /'; sleep "$int"; done;;
-  *)      send "$*";;
+          send "call ${mod@Q} ${meth@Q} ${json@Q}" | render ;;
+  watch)  shift; int="${1:-2}"; while true; do clear; echo "K.A.R.I. status — $(date)"; send status | render | sed 's/^/  /'; sleep "$int"; done;;
+  *)      send "$*" | render ;;
 esac
 KARISRC
   run "chmod +x ${KARI_SOCKET_CLI}"

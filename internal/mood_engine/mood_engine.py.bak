@@ -12,7 +12,7 @@ from core.logger import log_system, log_kari_async
 from internal.memory_cortex.memory_cortex import MemoryCortex
 
 meta_data = {
-    "name": "MoodEngine",
+    "name": "Mood Engine",
     "version": "1.6.1",
     "author": "Hraustligr",
     "description": "Emotion tracking core, influenced by internal states and external events",
@@ -29,123 +29,7 @@ meta_data = {
     ],
     "pulse": ["pulse"],
     "capabilities": ["neural_sync"],
-    "resources": ["cpu_usage", "mem_usage"],
-    "help": {
-        "_module": (
-            "Mood Engine keeps track of K.A.R.I.'s emotional state, maps moods to DEFCON,"
-            " and broadcasts changes to other modules.\n\n"
-            "Call `kari help \"Mood Engine\"` for this overview. Provide either JSON kwargs"
-            " or a space separated string when invoking actions."
-        ),
-        "set_mood": (
-            "Usage:\n"
-            "  set_mood <mood> [score]\n\n"
-            "JSON example:\n"
-            "  {\"mood\": \"happy\", \"score\": 90}\n\n"
-            "Sets an explicit override mood (0-100 score) and immediately announces the"
-            " resulting DEFCON. Overrides persist until cleared."
-        ),
-        "get_mood": (
-            "Usage:\n"
-            "  get_mood\n\n"
-            "Returns the effective mood (override if present, otherwise the dominant score)."
-        ),
-        "override": (
-            "Usage:\n"
-            "  override <mood>\n\n"
-            "Convenience wrapper that schedules `set_mood` from sync contexts."
-        ),
-        "clear_override": (
-            "Usage:\n"
-            "  clear_override\n\n"
-            "Removes any manual override so scores drive the mood again."
-        ),
-        "adjust_mood": (
-            "Usage:\n"
-            "  adjust_mood <mood> <delta>\n\n"
-            "JSON example:\n"
-            "  {\"mood\": \"anxious\", \"delta\": 5}\n\n"
-            "Adds `delta` (positive or negative) to the given mood's score with clamping"
-            " between 0 and 100."
-        ),
-        "_resolve_mood": (
-            "Usage:\n"
-            "  _resolve_mood\n\n"
-            "Async helper that decays scores toward neutral and returns the dominant mood."
-            " Primarily used internally, but exposed for diagnostics."
-        ),
-        "reset_scores": (
-            "Usage:\n"
-            "  reset_scores\n\n"
-            "Resets every mood score to zero. Typically followed by sensor updates to"
-            " rebuild state."
-        ),
-        "get_mood_score": (
-            "Usage:\n"
-            "  get_mood_score\n\n"
-            "Returns the full dictionary of mood scores for inspection or logging."
-        ),
-        "update_from_heartbeat": (
-            "Usage:\n"
-            "  update_from_heartbeat cpu=<percent> mem=<free_percent> temp=<celsius>\n\n"
-            "JSON example:\n"
-            "  {\"cpu\": 85, \"mem\": 30, \"temp\": 70}\n\n"
-            "Adjusts mood scores based on vitals provided by Pulse Matrix. High CPU, high"
-            " temperature, or low memory nudges anxious/angry/sad moods."
-        ),
-        "update_from_network": (
-            "Usage:\n"
-            "  update_from_network signal=<percent>\n\n"
-            "JSON example:\n"
-            "  {\"signal\": 25}\n\n"
-            "Boosts happy mood on strong Wi-Fi signals and anxious mood on weak links."
-        ),
-        "update_from_error": (
-            "Usage:\n"
-            "  update_from_error [critical=<0|1>]\n\n"
-            "JSON example:\n"
-            "  {\"critical\": true}\n\n"
-            "Raises glitch/angry mood scores for critical faults, or sad mood for minor"
-            " errors."
-        ),
-        "update_from_idle": (
-            "Usage:\n"
-            "  update_from_idle [seconds=<int>]\n\n"
-            "JSON example:\n"
-            "  {\"seconds\": 600}\n\n"
-            "Adds a small anxious/sad bias when K.A.R.I. has been idle longer than the"
-            " provided number of seconds (defaults to 60)."
-        ),
-        "report": (
-            "Usage:\n"
-            "  report\n\n"
-            "Logs the current mood and every score to the system log for quick review."
-        ),
-        "get_defcon_level": (
-            "Usage:\n"
-            "  get_defcon_level\n\n"
-            "Returns the DEFCON integer mapped from the current mood (1 is glitched, 5 is"
-            " happy)."
-        ),
-        "trigger_panic_routine": (
-            "Usage:\n"
-            "  trigger_panic_routine [mood]\n\n"
-            "JSON example:\n"
-            "  {\"mood\": \"glitched\"}\n\n"
-            "Broadcasts the DEFCON message for the supplied mood (or current mood if"
-            " omitted). Useful for manual drills."
-        ),
-        "report_alive": (
-            "Usage:\n"
-            "  report_alive\n\n"
-            "Writes a simple liveness line to the system log."
-        ),
-        "display_info": (
-            "Usage:\n"
-            "  display_info\n\n"
-            "Logs metadata fields like version, author, and description."
-        ),
-    },
+    "resources": ["cpu_usage", "mem_usage"]
 }
 
 class MoodEngine:
@@ -366,14 +250,6 @@ class MoodEngine:
     def display_info(self):
         for key, value in self.meta_data.items():
             log_system(f"{key}: {value}", source=self.name)
-
-    def help(self, topic: str | None = None) -> str:
-        """Return help text stored in meta_data['help']."""
-        help_map = getattr(self, "meta_data", {}).get("help", {})
-        if not topic:
-            return help_map.get("_module", f"{self.name} - no help available.")
-        key = topic.replace("-", "_")
-        return help_map.get(key, f"No help for '{topic}'.")
 
     # ---------- signal inputs ----------
     def update_from_heartbeat(self, cpu=None, mem=None, temp=None):

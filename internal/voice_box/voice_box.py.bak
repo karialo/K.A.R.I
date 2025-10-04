@@ -42,66 +42,6 @@ meta_data = {
     "pulse": ["pulse"],
     "capabilities": ["neural_sync"],
     "resources": ["cpu_usage", "mem_usage"],
-
-    "help": {
-        "_module": (
-            "VoiceBox selects phrase files, enforces cooldown/no-repeat, and dispatches"
-            " speech to the persona stream.\n\n"
-            "Actions accept JSON kwargs or space separated arguments. Provide `module_path`"
-            " when speaking phrases that live outside the default directory."
-        ),
-        "say": (
-            "Usage:\n"
-            "  say [tag=<type>] [mood=<mood>] [module_path=<path>] [return_only=<0|1>]\n\n"
-            "JSON example:\n"
-            "  {\"tag\": \"react\", \"mood\": \"happy\", \"module_path\": \"internal/pulse_matrix/phrases\"}\n\n"
-            "Resolves a phrase (default tag 'banter'), formats placeholders, and either"
-            " returns it (`return_only=true`) or logs it to the persona stream."
-        ),
-        "get_phrase": (
-            "Usage:\n"
-            "  get_phrase <tag> [mood=<mood>] [module_path=<path>]\n\n"
-            "Returns a random phrase without speaking it. Handy for previews or manual"
-            " formatting."
-        ),
-        "parse_phrase": (
-            "Usage:\n"
-            "  parse_phrase <phrase> [json context]\n\n"
-            "JSON example:\n"
-            "  {\"phrase\": \"CPU {cpu}%\", \"context\": {\"cpu\": 67}}\n\n"
-            "Formats a phrase string with Memory Cortex placeholder support."
-        ),
-        "shout": (
-            "Usage:\n"
-            "  shout [...options]\n\n"
-            "Alias for `say(tag='boot')`. Useful for boot greetings."
-        ),
-        "whisper": (
-            "Usage:\n"
-            "  whisper [...options]\n\n"
-            "Alias for `say(tag='banter')`. Respect cooldown and norepeat guards."
-        ),
-        "react": (
-            "Usage:\n"
-            "  react [mood=<mood>] [module_path=<path>] [context=<json>]\n\n"
-            "Dispatches a react phrase and optionally emits a bus react event when enabled."
-        ),
-        "banter": (
-            "Usage:\n"
-            "  banter [mood=<mood>] [module_path=<path>]\n\n"
-            "Triggers the adaptive banter loop immediately (respecting cooldowns)."
-        ),
-        "report_alive": (
-            "Usage:\n"
-            "  report_alive\n\n"
-            "Logs an operational heartbeat message."
-        ),
-        "display_info": (
-            "Usage:\n"
-            "  display_info\n\n"
-            "Logs metadata fields for diagnostics."
-        ),
-    },
 }
 
 # ---------- helpers (cooldown / no-repeat / neutral guard) ----------
@@ -454,14 +394,6 @@ class VoiceBox:
     def display_info(self):
         for key, value in self.meta_data.items():
             self.log(f"{key}: {value}")
-
-    def help(self, topic: str | None = None) -> str:
-        """Return help text stored in meta_data['help']."""
-        help_map = getattr(self, "meta_data", {}).get("help", {})
-        if not topic:
-            return help_map.get("_module", f"{self.name} - no help available.")
-        key = topic.replace("-", "_")
-        return help_map.get(key, f"No help for '{topic}'.")
 
     def pulse(self):
         # keep shared data fresh
