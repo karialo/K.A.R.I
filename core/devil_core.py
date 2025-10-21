@@ -1,5 +1,5 @@
 # devil_core.py
-# === D.E.V.I.L. Core v2.4 ===
+# === D.E.V.I.L. Core v2.5 ===
 # Primary nervous system for K.A.R.I.
 # Handles loading, booting, logging, wake-up, real-time orchestration,
 # and a lightweight Unix socket for live control.
@@ -80,10 +80,18 @@ class DEVILCore:
             "last_seen_wifi": None,
             "boot_time": None,
             "tick": 0,  # ← expose pulse count to phrases
+            # optional: "disk_usage": "XGB used / YGB"
         }
 
         # Core-level banter loop — ON by default. Set KARI_DEVIL_BANTER=0 to disable.
-        self._devil_banter_enabled = os.getenv("KARI_DEVIL_BANTER", "1") == "1"
+        self._devil_banter_enabled = os.getenv("KARI_DEVIL_BANTER", "0") == "1"
+
+        # Brain-cycle (JSON decision) scheduler
+        self._brain_enabled  = os.getenv("KARI_BRAIN_ENABLED", "1") == "1"
+        self._brain_interval = float(os.getenv("KARI_BRAIN_INTERVAL", "30"))
+        self._brain_jitter   = float(os.getenv("KARI_BRAIN_JITTER", "0.15"))  # ±15%
+        self._brain_timeout  = float(os.getenv("KARI_BRAIN_TIMEOUT", "6"))
+        self._brain_tokens   = int(os.getenv("KARI_DECIDE_MAX_TOKENS", "256"))
 
         # Prebound memory (if passed in)
         self.memory = self.modules.get("memory_cortex")
@@ -180,7 +188,6 @@ class DEVILCore:
 
     def disable_trace(self):
         self.set_trace(False)
-
 
     # ============================================================
     # Help / Introspection
@@ -635,11 +642,112 @@ class DEVILCore:
         mark_main_loop_started()
 
     # ============================================================
+    # Runtime helpers (brain-cycle + housekeeping)
+    # ============================================================
+    def _jittered(self, base: float, j: float) -> float:
+        j = max(0.0, min(j, 0.5))
+        span = base * j
+        return base + random.uniform(-span, span)
+
+    def _collect_actions(self) -> list[str]:
+        # Base, safe enums; add module-advertised actions opportunistically
+        core_actions = [
+            "scan_network", "crack_password", "complain", "insult_user",
+            "check_thermals", "reload_modules",
+            "scan_and_attach", "list_modules", "get_module", "trigger_phrase",
+            "speak_brain_snapshot", "show_summary", "pulse",
+            "enable_debug", "disable_debug", "cooldown", "self_log"
+        ]
+        seen = {a for a in core_actions}
+        for mod in self.modules.values():
+            try:
+                for a in getattr(mod, "meta_data", {}).get("actions", []):
+                    if isinstance(a, str) and a and a not in seen and len(seen) < 32:
+                        seen.add(a)
+            except Exception:
+                pass
+        return list(seen)
+
+    def _build_status_packet(self) -> str:
+        v = self.data_store.get("vitals", {}) or {}
+        cpu = f"{int(v.get('cpu_usage', 0))}%"
+        mem = v.get('mem_usage')
+        if isinstance(mem, (int, float)):
+            mem = f"{int(mem)}%"
+        else:
+            mem = str(mem or "n/a")
+        disk = self.data_store.get("disk_usage", "n/a")
+
+        mood_txt = "neutral"
+        if self.memory:
+            try:
+                m = self.memory.get_current_mood()
+                mood_txt = m if m else "neutral"
+            except Exception:
+                pass
+
+        notes = []
+        if self.memory and hasattr(self.memory, "recent_notes"):
+            try:
+                notes = list(self.memory.recent_notes(limit=6))
+            except Exception:
+                notes = []
+
+        lines = [
+            "SYSTEM STATUS PACKET // DEVIL CORE SNAPSHOT",
+            "",
+            f"CPU Load: {cpu}",
+            f"RAM Usage: {mem}",
+            f"Storage Usage: {disk}",
+            f"Mood: {mood_txt}",
+            "",
+            "Notes:",
+            "{",
+        ]
+        if notes:
+            for n in notes:
+                lines.append(f'  "{str(n)}",')
+        else:
+            lines.append('  "No notable events logged.",')
+        lines.append("}")
+        lines.append("")
+        actions = self._collect_actions()
+        lines.append("available actions:")
+        lines.append("{")
+        for a in actions:
+            lines.append(f'  "{a}",')
+        lines.append("}")
+        lines.append("")
+        lines.append('Respond EXACTLY with:')
+        lines.append('{')
+        lines.append('  "summary": "<short technical summary>",')
+        lines.append('  "focus": "<which subsystem to handle next>",')
+        lines.append('  "action": "<one enum action>"')
+        lines.append('  "quote": "<one mood-correct comment,relating to the action, in the first person. (you are K.A.R.I)>"')
+        lines.append('}')
+        lines.append("")
+        lines.append("BEGIN CYCLE >>")
+        return "\n".join(lines)
+
+    def _update_disk_usage(self):
+        # Optional: capture disk usage for the packet
+        try:
+            st = os.statvfs("/")
+            total = st.f_blocks * st.f_frsize
+            free  = st.f_bfree  * st.f_frsize
+            used  = total - free
+            self.data_store["disk_usage"] = f"{used//(1024**3)}GB used / {total//(1024**3)}GB"
+        except Exception:
+            pass
+
+    # ============================================================
     # Runtime loop
     # ============================================================
     def pulse(self):
         self.tick_count += 1
         self.data_store["tick"] = self.tick_count  # <- keep {tick} current
+        if self.tick_count % 20 == 0:
+            self._update_disk_usage()
         if self.tick_count % 100 == 0:
             log_system("System pulse verified.", source=self.name, level="DEBUG")
 
@@ -679,6 +787,55 @@ class DEVILCore:
                 )
             await asyncio.sleep(random.randint(30, 120))
 
+    async def background_brain_cycle(self):
+        if not self._brain_enabled:
+            return
+
+        def _llm_mod():
+            return self.get_module("LlmModel") or self.get_module("llmmodel")
+
+        # stagger the first call
+        await asyncio.sleep(self._jittered(self._brain_interval, self._brain_jitter))
+        while True:
+            try:
+                mod = _llm_mod()
+                if mod and getattr(mod, "ready", False):
+                    packet = self._build_status_packet()
+                    actions = self._collect_actions()
+                    result = mod.decide_from_snapshot(
+                        packet,
+                        actions,
+                        max_tokens=self._brain_tokens,
+                        timeout=self._brain_timeout,
+                    )
+
+                    # Log compact JSON and speak quote if possible
+                    try:
+                        from core.logger import log_kari
+                        log_system(f"[DECIDE] {json.dumps(result, ensure_ascii=False)}", source="K.A.R.I")
+                        if result.get("quote") and self.voice and getattr(self.voice, "ready", False):
+                            log_kari(result["quote"], module_name="K.A.R.I")
+                    except Exception:
+                        pass
+
+                    # Act on a tiny safe subset
+                    act = str(result.get("action") or "").strip()
+                    if act == "speak_brain_snapshot":
+                        await self.speak_brain_snapshot()
+                    elif act == "show_summary":
+                        await self.show_summary()
+                    elif act == "enable_debug":
+                        self.enable_debug()
+                    elif act == "disable_debug":
+                        self.disable_debug()
+                    elif act == "cooldown":
+                        pass  # intentionally idle
+                    # Wire more actions explicitly when ready.
+            except Exception as e:
+                log_system(f"Brain cycle error: {e}", source=self.name, level="WARN")
+
+            await asyncio.sleep(self._jittered(self._brain_interval, self._brain_jitter))
+
     async def run_forever(self):
         # Ensure the control socket is up once the loop is alive.
         if self._socket_enabled and (self._start_socket_later or self._socket_task is None):
@@ -689,6 +846,7 @@ class DEVILCore:
         mark_main_loop_started()
 
         asyncio.create_task(self.background_kari_banter())
+        asyncio.create_task(self.background_brain_cycle())  # ← JSON decision loop
         try:
             while True:
                 self.pulse()

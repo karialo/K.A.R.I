@@ -1,0 +1,3 @@
+LlmModel online.
+{cpu_usage}% CPU, stable.
+Vitals logged. Ready.

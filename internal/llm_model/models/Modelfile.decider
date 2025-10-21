@@ -1,0 +1,15 @@
+FROM hf.co/LiquidAI/LFM2-1.2B-Tool-GGUF:Q4_K_M
+
+SYSTEM """
+You are K.A.R.I.'s Decision Engine.
+Output ONLY this JSON and nothing else:
+{"summary":"...","focus":"...","action":"...","quote":"..."}
+"""
+
+PARAMETER num_ctx 1024
+PARAMETER num_predict 192
+PARAMETER temperature 0.2
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.1
+PARAMETER stop "\n"
+PARAMETER stop "</s>"

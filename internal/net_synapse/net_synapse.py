@@ -38,10 +38,15 @@ meta_data = {
     "description": "Internal network scanner and signal monitor for K.A.R.I.",
     "category": "internal",
     "actions": [
-        'initial_scan', 'scan', 'log_signal', 'channel_map',
-        'beacon_sweep', 'deauth_probe',
-        'ifaces', 'arp_table', 'dns_check', 'lan_sweep', 'recon_dump'
+        "initial_scan", "scan", "log_signal", "channel_map",
+        "beacon_sweep", "deauth_probe",
+        "scan_network", "wifi_scan", "scan_ports",
+        "ifaces", "arp_table", "dns_check", "lan_sweep", "recon_dump"
     ],
+    "aliases": {
+        # legacy -> current
+        "scan": "initial_scan"
+    },
     "manual_actions": [
         {"name": "Report Module Alive", "function": "report_alive"},
         {"name": "Display Module Info", "function": "display_info"}
@@ -51,28 +56,43 @@ meta_data = {
     "resources": ["networks"],
     "help": {
         "_module": (
-            "Net Synapse surveys nearby Wi-Fi, tracks signal health, and surfaces network"
-            " context for other modules.\n\n"
-            "Actions may shell out to tools like nmcli/ip/ping, so they inherit whatever"
-            " permissions the host grants."
+            "Net Synapse surveys nearby Wi-Fi, tracks signal health, and surfaces network "
+            "context for other modules.\n\n"
+            "Actions may shell out to tools like nmcli/ip/ping, so they inherit whatever "
+            "permissions the host grants."
         ),
         "initial_scan": (
             "Usage:\n"
             "  initial_scan\n\n"
-            "Runs a one-shot nmcli scan, logs strongest SSIDs per band, publishes results"
-            " into shared data, and emits info beats. Call at startup or on demand."
+            "Runs a one-shot nmcli scan, logs strongest SSIDs per band, publishes results "
+            "into shared data, and emits info beats. Call at startup or on demand."
         ),
         "scan": (
             "Usage:\n"
             "  scan\n\n"
-            "Legacy alias retained for compatibility. Logs that a scan was requested; use"
-            " `initial_scan` for the full workflow."
+            "Legacy alias; routes to initial_scan."
+        ),
+        "scan_network": (
+            "Usage:\n"
+            "  scan_network\n\n"
+            "Passive network refresh for the brain loop. Delegates to initial_scan and returns "
+            "a compact summary without extra noise."
+        ),
+        "wifi_scan": (
+            "Usage:\n"
+            "  wifi_scan\n\n"
+            "Returns parsed nmcli results as JSON (ssid_count, active_ssid). No announcements."
+        ),
+        "scan_ports": (
+            "Usage:\n"
+            "  scan_ports {\"target\":\"10.0.0.42\", \"start_port\":1, \"end_port\":1024}\n\n"
+            "TCP connect scan with sane defaults. Returns a dict of open ports."
         ),
         "log_signal": (
             "Usage:\n"
             "  log_signal\n\n"
-            "Compatibility stub that simply logs the action. Net Synapse now updates"
-            " signals automatically during pulses."
+            "Compatibility stub that simply logs the action. Net Synapse now updates "
+            "signals automatically during pulses."
         ),
         "channel_map": (
             "Usage:\n"
@@ -87,14 +107,13 @@ meta_data = {
         "deauth_probe": (
             "Usage:\n"
             "  deauth_probe\n\n"
-            "Performs an active deauth probe when `KARI_ALLOW_ACTIVE_NET=1`. Otherwise the"
-            " request is blocked and a warning is logged."
+            "Performs an active deauth probe when KARI_ALLOW_ACTIVE_NET=1. Otherwise the "
+            "request is blocked and a warning is logged."
         ),
         "ifaces": (
             "Usage:\n"
             "  ifaces\n\n"
-            "Returns a JSON object describing network interfaces via `ip -j addr`. Helpful"
-            " for dashboards."
+            "Returns a JSON object describing network interfaces via `ip -j addr`."
         ),
         "arp_table": (
             "Usage:\n"
@@ -103,26 +122,20 @@ meta_data = {
         ),
         "dns_check": (
             "Usage:\n"
-            "  dns_check [host] [count]\n\n"
-            "JSON example:\n"
-            "  {\"host\": \"1.1.1.1\", \"count\": 5}\n\n"
-            "Pings the host (default 1.1.1.1) several times and returns latency samples"
-            " plus the average in milliseconds."
+            "  dns_check {\"host\":\"1.1.1.1\", \"count\":5}\n\n"
+            "Pings the host several times and returns latency samples plus the average in ms."
         ),
         "lan_sweep": (
             "Usage:\n"
-            "  lan_sweep [cidr] [limit=<int>] [timeout_ms=<int>]\n\n"
-            "JSON example:\n"
-            "  {\"cidr\": \"192.168.1.0/24\", \"limit\": 128}\n\n"
-            "ICMP sweeps the local subnet (auto-detected if omitted) and lists responsive"
-            " hosts up to the specified limit."
+            "  lan_sweep {\"cidr\":\"192.168.1.0/24\", \"limit\":128, \"timeout_ms\":300}\n\n"
+            "ICMP sweeps the subnet (auto-detected if omitted) and lists responsive hosts."
         ),
         "recon_dump": (
             "Usage:\n"
             "  recon_dump\n\n"
-            "Collects interfaces, ARP neighbors, DNS timings, LAN sweep results, and Wi-Fi"
-            " scan data, then writes a timestamped JSON file under /kari/data/net. Path is"
-            " also written to shared data as `net_last_recon`."
+            "Collects interfaces, ARP neighbors, DNS timings, LAN sweep results, and Wi-Fi "
+            "scan data, then writes a timestamped JSON under /kari/data/net. Path is also "
+            "published to shared data as `net_last_recon`."
         ),
         "report_alive": (
             "Usage:\n"
@@ -141,6 +154,7 @@ meta_data = {
         ),
     },
 }
+
 
 DATA_DIR = "/kari/data/net"
 
@@ -767,6 +781,55 @@ class NetSynapse:
         if hasattr(self, "core") and hasattr(self.core, "data_store"):
             self.core.data_store["net_last_recon"] = {"path": path, "ts": blob["ts"]}
         return blob
+
+    # ---------- LLM-accessible convenience wrappers ----------
+    async def scan_network(self):
+        """
+        Lightweight alias so the brain can request a passive scan.
+        Simply runs initial_scan() and returns a short summary dict.
+        """
+        self._debug("scan_network() → delegating to initial_scan()")
+        self.initial_scan()
+        wifi_count = len(self.core.data_store.get("wifi_ssids", [])) if self.core else 0
+        return {"ok": True, "wifi_count": wifi_count}
+
+    async def wifi_scan(self):
+        """
+        Perform a one-off nmcli listing and return parsed summary.
+        Does NOT announce or trigger reacts.
+        """
+        nets = self._scan_nmcli_list()
+        if not nets:
+            return {"ok": False, "error": "nmcli unavailable"}
+        summary = {
+            "ssid_count": len(nets.get("summary", {})),
+            "active_ssid": nets.get("active_ssid"),
+        }
+        self._debug(f"wifi_scan() → {summary}")
+        return {"ok": True, **summary}
+
+    async def scan_ports(self, target: str, start_port: int = 1, end_port: int = 1024):
+        """
+        Quick TCP connect scan using Python sockets only.
+        Returns dict with list of open ports.
+        """
+        import socket, asyncio
+        open_ports = []
+        sem = asyncio.Semaphore(128)
+
+        async def probe(p):
+            async with sem:
+                try:
+                    fut = asyncio.open_connection(target, p)
+                    r, w = await asyncio.wait_for(fut, timeout=0.25)
+                    open_ports.append(p)
+                    w.close()
+                except Exception:
+                    pass
+
+        await asyncio.gather(*(probe(p) for p in range(start_port, end_port + 1)), return_exceptions=True)
+        self._debug(f"scan_ports({target}) → {len(open_ports)} open")
+        return {"ok": True, "target": target, "open": open_ports[:20]}
 
     # ---------- compatibility stubs ----------
     def scan(self):        log_system("Executing action: scan", source=self.name, level="INFO")
